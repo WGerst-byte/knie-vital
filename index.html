@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KnieVital - Dein digitaler Knie-Therapie & Physio-Begleiter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/custom.css">
+<link rel="icon" type="image/png" sizes="512x512" href="knee_app_icon_512.png">
+<link rel="apple-touch-icon" href="knee_app_icon_512.png">
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased selection:bg-teal-500 selection:text-white">
+
+    <!-- ========================================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================================= -->
+    <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3 cursor-pointer" onclick="app.switchTab('overview')">
+                    <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-md shadow-teal-600/30">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xl font-extrabold tracking-tight text-slate-900">KnieVital</span>
+                            <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-teal-100 text-teal-800 rounded-full">Physio-Therapie</span>
+                        </div>
+                        <p class="text-xs text-slate-500 hidden sm:block">Digitale Knie-Rehabilitation & Schmerzlinderung</p>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs (Desktop) -->
+                <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1.5 rounded-xl border border-slate-200/60">
+                    <button onclick="app.switchTab('overview')" data-tab="overview" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all bg-teal-600 text-white">
+                        Übersicht & Check
+                    </button>
+                    <button onclick="app.switchTab('light-exercises')" data-tab="light-exercises" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:bg-slate-200/60">
+                        Leichte Übungen
+                    </button>
+                    <button onclick="app.switchTab('stretching')" data-tab="stretching" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:bg-slate-200/60">
+                        Dehnungsübungen
+                    </button>
+                    <button onclick="app.switchTab('consultant')" data-tab="consultant" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:bg-slate-200/60">
+                        Physio-Berater
+                    </button>
+                    <button onclick="app.switchTab('diary')" data-tab="diary" class="nav-tab-btn px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-600 hover:bg-slate-200/60">
+                        Schmerztagebuch
+                    </button>
+                </nav>
+
+                <!-- Audio Toggle & Schnellstart -->
+                <div class="flex items-center gap-2">
+                    <button id="mute-toggle-btn" onclick="const muted = physioAudio.toggleMute(); this.classList.toggle('text-rose-600', muted); this.title = muted ? 'Ton aktiviert' : 'Ton stummgeschaltet';" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors" title="Signalton an/aus">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                    </button>
+                    <button onclick="window.print()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                        Plan drucken
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div class="flex md:hidden overflow-x-auto py-2 gap-1 border-t border-slate-100 scrollbar-none">
+                <button onclick="app.switchTab('overview')" data-tab="overview" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap bg-teal-600 text-white">
+                    Übersicht
+                </button>
+                <button onclick="app.switchTab('light-exercises')" data-tab="light-exercises" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap text-slate-600">
+                    Leichte Übungen
+                </button>
+                <button onclick="app.switchTab('stretching')" data-tab="stretching" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap text-slate-600">
+                    Dehnungen
+                </button>
+                <button onclick="app.switchTab('consultant')" data-tab="consultant" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap text-slate-600">
+                    Physio-Berater
+                </button>
+                <button onclick="app.switchTab('diary')" data-tab="diary" class="nav-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap text-slate-600">
+                    Tagebuch
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!-- MAIN CONTENT CONTAINER -->
+    <!-- ========================================================================= -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ===================================================================== -->
+        <!-- TAB 1: ÜBERSICHT & SCHMERZ-CHECK -->
+        <!-- ===================================================================== -->
+        <section id="tab-overview" class="tab-content space-y-10">
+            
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-800 via-teal-700 to-slate-900 text-white p-8 sm:p-12 shadow-xl shadow-teal-900/10">
+                <div class="relative z-10 max-w-3xl">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-teal-500/20 text-teal-200 border border-teal-400/30 mb-4 backdrop-blur">
+                        <span class="w-2 h-2 rounded-full bg-teal-400 animate-ping"></span>
+                        Evidenzbasierte Knie-Therapie
+                    </span>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-4">
+                        Wieder schmerzfrei bewegen: Ihr gezieltes Knie-Therapieprogramm
+                    </h1>
+                    <p class="text-base sm:text-lg text-teal-100/90 leading-relaxed mb-8">
+                        Schonen war gestern: Ein Knie braucht gezielte, sanfte Mobilisation und dosierte Dehnung, um Knorpel und Sehnen zu regenerieren. Starten Sie direkt mit leichten Übungen oder lassen Sie sich vom Physio-Berater anleiten.
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button onclick="app.switchTab('light-exercises')" class="px-6 py-3.5 rounded-xl bg-white text-teal-900 font-bold text-sm hover:bg-teal-50 transition-all shadow-md flex items-center gap-2">
+                            <span>🏃‍♂️</span> Zu den leichten Übungen
+                        </button>
+                        <button onclick="app.switchTab('stretching')" class="px-6 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-sm transition-all border border-teal-400/40 flex items-center gap-2">
+                            <span>🧘‍♀️</span> Gezielte Dehnungsübungen
+                        </button>
+                        <button onclick="document.getElementById('symptom-checker-card').scrollIntoView({ behavior: 'smooth' })" class="px-5 py-3.5 rounded-xl bg-teal-950/60 hover:bg-teal-950 text-teal-200 font-semibold text-sm transition-all border border-teal-700/50">
+                            🩺 Symptom-Check starten
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Deko-Elemente im Hintergrund -->
+                <div class="absolute -right-20 -bottom-20 w-96 h-96 rounded-full bg-teal-500/10 blur-3xl pointer-events-none"></div>
+                <div class="absolute right-10 top-10 opacity-10 hidden lg:block pointer-events-none">
+                    <svg class="w-72 h-72 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Red Flags Banner (Wann sofort zum Arzt?) -->
+            <div class="bg-rose-50/70 border border-rose-200/80 rounded-2xl p-6">
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0 font-bold text-lg">
+                        🚨
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-base font-bold text-rose-950 mb-1">Medizinische Warnsignale („Red Flags“) – Wann Sie zum Facharzt müssen</h3>
+                        <p class="text-xs text-rose-800 leading-relaxed mb-4">
+                            Dieses Trainingsprogramm ist für typische Überlastungen, Knorpelverschleiß (Arthrose) und muskuläre Verkürzungen konzipiert. Bei folgenden Symptomen brechen Sie das Training bitte sofort ab und konsultieren einen Arzt:
+                        </p>
+                        <div id="red-flags-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <!-- Wird dynamisch gefüllt -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interaktiver Symptom- & Schmerz-Check (Anamnese) -->
+            <div id="symptom-checker-card" class="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-10 shadow-sm">
+                <div class="max-w-2xl mb-8">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800 mb-2">
+                        Digitaler Befundungs-Assistent
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
+                        Ihr persönlicher Knie-Symptom-Check
+                    </h2>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Beantworten Sie 4 kurze Fragen. Unser virtueller Physio analysiert Ihre Angaben und schlägt Ihnen die wirksamste Übungskombination vor.
+                    </p>
+                </div>
+
+                <form id="symptom-check-form" class="space-y-8">
+                    
+                    <!-- Frage 1: Schmerzlokalisation -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-900 mb-3">
+                            1. Wo lokalisieren Sie den Hauptschmerz am Knie?
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-location" value="front" checked class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Vorderseite / Kniescheibe</span>
+                                    <span class="text-[11px] text-slate-500">Patellasehne, Knorpel</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-location" value="outer" class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Außenseite des Knies</span>
+                                    <span class="text-[11px] text-slate-500">IT-Band / Läuferknie</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-location" value="inner" class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Innenseite des Knies</span>
+                                    <span class="text-[11px] text-slate-500">Innenband, Meniskus, Pes anserinus</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-location" value="back" class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Kniekehle / Rückseite</span>
+                                    <span class="text-[11px] text-slate-500">Hamstrings, Baker-Zyste, Wade</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Frage 2: Schmerzsituation / Auslöser -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-900 mb-3">
+                            2. Wann tritt der Schmerz typischerweise am stärksten auf?
+                        </label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-trigger" value="stairs" checked class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Treppen / Bergabgehen</span>
+                                    <span class="text-[11px] text-slate-500">Hohe Druckbelastung</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-trigger" value="morning" class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Morgens („Anlaufschmerz“)</span>
+                                    <span class="text-[11px] text-slate-500">Klassisch bei Knorpelsteife</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-trigger" value="running" class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Nach Joggen / Sport</span>
+                                    <span class="text-[11px] text-slate-500">Typische Sehnenreizung</span>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                                <input type="radio" name="knee-trigger" value="sitting" class="text-teal-600 focus:ring-teal-500 mr-3">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-900">Nach langem Sitzen</span>
+                                    <span class="text-[11px] text-slate-500">„Kino-Zeichen“</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Frage 3: Akute Schwellung -->
+                    <div>
+                        <label class="block text-sm font-bold text-slate-900 mb-3">
+                            3. Ist das Knie aktuell sichtbar geschwollen, rot oder fühlbar überwärmt?
+                        </label>
+                        <div class="flex items-center gap-6">
+                            <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700">
+                                <input type="radio" name="knee-swelling" value="no" checked class="text-teal-600 focus:ring-teal-500">
+                                Nein, keine Schwellung/Hitze
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-slate-700">
+                                <input type="radio" name="knee-swelling" value="yes" class="text-rose-600 focus:ring-rose-500">
+                                Ja, Knie ist geschwollen / heiß
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Frage 4: Schmerz-Skala (VAS) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-slate-900">
+                                4. Wie stark ist Ihr Schmerz aktuell? (Skala 0–10)
+                            </label>
+                            <span id="pain-range-value" class="text-base font-extrabold text-teal-700 bg-teal-50 px-3 py-1 rounded-lg border border-teal-200">
+                                3 / 10
+                            </span>
+                        </div>
+                        <input id="pain-range-input" type="range" min="0" max="10" value="3" class="w-full h-3 rounded-lg appearance-none cursor-pointer pain-slider">
+                        <div class="flex justify-between text-[11px] font-semibold text-slate-500 mt-2 px-1">
+                            <span>0 = Schmerzfrei</span>
+                            <span>3 = Leicht / Wohlfühlschmerz</span>
+                            <span>6 = Mäßig stark</span>
+                            <span>10 = Unerträglich</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-4">
+                        <button type="submit" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm transition-all shadow-lg shadow-teal-600/25 flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                            Symptome analysieren & Trainingsplan ermitteln
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Ergebnisbereich nach dem Check -->
+                <div id="assessment-result-container" class="mt-8"></div>
+            </div>
+
+            <!-- Schnellauswahl der zwei Hauptabschnitte -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Box 1: Leichte Übungen -->
+                <div class="bg-gradient-to-br from-teal-50 to-white rounded-3xl border border-teal-200/80 p-8 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center mb-5 shadow-md shadow-teal-600/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-2">Leichte Übungen für Knie-Patienten</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                            Schonende Mobilisation & isometrischer Muskelaufbau. Perfekt bei akuten Schmerzen, Arthrose oder nach Operationen – ohne Druckbelastung auf den Knorpel.
+                        </p>
+                        <ul class="text-xs text-slate-700 space-y-2 mb-6">
+                            <li class="flex items-center gap-2">✓ Fersenschleifen (Heel Slides) zur Gelenkschmiere</li>
+                            <li class="flex items-center gap-2">✓ Kniekehlendruck zur Quadrizeps-Aktivierung</li>
+                            <li class="flex items-center gap-2">✓ Sanfte Beckenbrücke für die Beinachse</li>
+                        </ul>
+                    </div>
+                    <button onclick="app.switchTab('light-exercises')" class="w-full py-3 px-4 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        Abschnitt öffnen (6 Übungen) →
+                    </button>
+                </div>
+
+                <!-- Box 2: Dehnungsübungen -->
+                <div class="bg-gradient-to-br from-amber-50 to-white rounded-3xl border border-amber-200/80 p-8 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center mb-5 shadow-md shadow-amber-500/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-2">Dehnungsübungen bei Knieschmerzen</h3>
+                        <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                            Nimmt sofort den Zug von der Kniescheibe und entspannt verkürzte Muskelketten an Oberschenkel, Wade und Außenseite (Läuferknie).
+                        </p>
+                        <ul class="text-xs text-slate-700 space-y-2 mb-6">
+                            <li class="flex items-center gap-2">✓ Oberschenkelvorder- & Rückseite gezielt dehnen</li>
+                            <li class="flex items-center gap-2">✓ IT-Band Dehnung bei Außenseitenschmerz</li>
+                            <li class="flex items-center gap-2">✓ Wadendehnung zur Entlastung der Kniekehle</li>
+                        </ul>
+                    </div>
+                    <button onclick="app.switchTab('stretching')" class="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                        Abschnitt öffnen (5 Dehnungen) →
+                    </button>
+                </div>
+            </div>
+
+            <!-- FAQ & Physio-Wissen Accordion -->
+            <div class="bg-slate-100/70 rounded-3xl p-6 sm:p-8 border border-slate-200">
+                <div class="max-w-2xl mb-6">
+                    <h3 class="text-xl font-extrabold text-slate-900">Physio-Wissen für Ihren Alltag</h3>
+                    <p class="text-xs text-slate-600">Die wichtigsten Fragen unserer Knie-Patienten direkt beantwortet.</p>
+                </div>
+                <div id="knowledge-faq-container" class="space-y-3">
+                    <!-- FAQ Items -->
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- TAB 2: LEICHTE ÜBUNGEN FÜR KNIE-PATIENTEN -->
+        <!-- ===================================================================== -->
+        <section id="tab-light-exercises" class="tab-content hidden space-y-8">
+            <div class="bg-teal-50 border border-teal-200/80 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div>
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800 mb-2">
+                        Abschnitt 1: Sanfte Mobilisation & Isometrie
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+                        Leichte Übungen für Knie-Patienten
+                    </h2>
+                    <p class="text-sm text-teal-900/80 max-w-2xl leading-relaxed">
+                        Diese Übungen bewegen das Knie ohne axiale Stoßbelastung. Sie stimulieren die Bildung von Gelenkschmiere und stärken die kniestabilisierende Muskulatur (Vastus Medialis).
+                    </p>
+                </div>
+                <button onclick="app.startCategoryWorkout('light')" class="px-6 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm whitespace-nowrap shadow-lg shadow-teal-600/20 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
+                    Alle leichten Übungen nacheinander starten
+                </button>
+            </div>
+
+            <!-- Grid der leichten Übungen -->
+            <div id="light-exercises-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamisch aus exercises.js -->
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- TAB 3: DEHNUNGSÜBUNGEN BEI KNIESCHMERZEN -->
+        <!-- ===================================================================== -->
+        <section id="tab-stretching" class="tab-content hidden space-y-8">
+            <div class="bg-amber-50 border border-amber-200/80 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div>
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 mb-2">
+                        Abschnitt 2: Myofasziale Entlastung & Zugreduktion
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+                        Dehnungsübungen gegen Knieschmerzen
+                    </h2>
+                    <p class="text-sm text-amber-900/80 max-w-2xl leading-relaxed">
+                        Ein hoher Tonus in Quadrizeps, Wade oder Ischiocruralen Muskeln komprimiert das Kniegelenk dauerhaft. Regelmäßige Dehnung verringert den Anpressdruck der Kniescheibe spürbar.
+                    </p>
+                </div>
+                <button onclick="app.startCategoryWorkout('stretch')" class="px-6 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm whitespace-nowrap shadow-lg shadow-amber-500/20 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /></svg>
+                    Alle Dehnungen nacheinander starten
+                </button>
+            </div>
+
+            <!-- Grid der Dehnungsübungen -->
+            <div id="stretch-exercises-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Dynamisch aus exercises.js -->
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- TAB 4: PHYSIO-BERATER (INTERAKTIVER CHAT & Q&A) -->
+        <!-- ===================================================================== -->
+        <section id="tab-consultant" class="tab-content hidden space-y-8">
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[700px]">
+                
+                <!-- Chat Header -->
+                <div class="p-4 sm:p-6 bg-slate-900 text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-11 h-11 rounded-2xl bg-teal-600 text-white flex items-center justify-center font-bold text-lg">
+                                PT
+                            </div>
+                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-slate-900"></span>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white">Digitaler Physio-Berater</h3>
+                            <p class="text-xs text-teal-300">Antwortet sofort auf Ihre Fragen rund um Knie, Belastung & Übungen</p>
+                        </div>
+                    </div>
+                    <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700 hidden sm:inline-block">
+                        Evidenzbasiert & Patientennah
+                    </span>
+                </div>
+
+                <!-- Chat Quick Prompts -->
+                <div class="bg-slate-50 border-b border-slate-200 p-3 overflow-x-auto flex items-center gap-2 scrollbar-none">
+                    <span class="text-[11px] font-bold text-slate-500 whitespace-nowrap pl-1">Häufig gefragt:</span>
+                    <button onclick="app.sendChatMessage('Darf ich mit Knieschmerzen joggen gehen?')" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700 whitespace-nowrap transition-colors">
+                        🏃‍♂️ Darf ich joggen?
+                    </button>
+                    <button onclick="app.sendChatMessage('Wann hilft Kälte und wann Wärme beim Knie?')" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700 whitespace-nowrap transition-colors">
+                        ❄️ Wärme oder Kälte?
+                    </button>
+                    <button onclick="app.sendChatMessage('Ist Radfahren gut für mein Knie?')" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700 whitespace-nowrap transition-colors">
+                        🚴 Radfahren mit Arthrose?
+                    </button>
+                    <button onclick="app.sendChatMessage('Mein Knie knackt und knirscht – ist das gefährlich?')" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700 whitespace-nowrap transition-colors">
+                        💥 Knacken im Knie?
+                    </button>
+                    <button onclick="app.sendChatMessage('Sollte ich eine Kniebandage tragen?')" class="px-3 py-1 rounded-full bg-white border border-slate-200 text-xs font-medium text-slate-700 hover:border-teal-500 hover:text-teal-700 whitespace-nowrap transition-colors">
+                        🩹 Bandage sinnvoll?
+                    </button>
+                </div>
+
+                <!-- Chat Message Area -->
+                <div id="chat-messages-container" class="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4 bg-slate-50/30">
+                    <!-- Nachrichten werden durch consultant.js / app.js gerendert -->
+                </div>
+
+                <!-- Chat Input Form -->
+                <div class="p-4 bg-white border-t border-slate-200">
+                    <form onsubmit="event.preventDefault(); app.sendChatMessage();" class="flex items-center gap-2">
+                        <input id="consultant-chat-input" type="text" placeholder="Stellen Sie hier Ihre Frage (z.B. Meniskus, Treppenabwärts, Schuhe...)" class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <button type="submit" class="px-5 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-sm transition-colors flex items-center gap-2">
+                            <span>Senden</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ===================================================================== -->
+        <!-- TAB 5: SCHMERZTAGEBUCH (DIARY & TRACKING) -->
+        <!-- ===================================================================== -->
+        <section id="tab-diary" class="tab-content hidden space-y-8">
+            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+                <div class="max-w-2xl mb-6">
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800 mb-2">
+                        Verlaufskontrolle
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-2">
+                        Ihr Knie-Therapie-Tagebuch
+                    </h2>
+                    <p class="text-sm text-slate-600">
+                        Dokumentieren Sie regelmäßig Ihr Schmerzlevel vor und nach den Einheiten. Ein sinkender Trend zeigt, dass sich die Knorpel- und Muskelstatik stabilisiert.
+                    </p>
+                </div>
+
+                <!-- Neuer Eintrag Formular -->
+                <form id="new-diary-entry-form" class="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 mb-8">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800 mb-4">Neuen Tagebuch-Eintrag verfassen</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Schmerzstärke (0–10)</label>
+                            <input id="diary-pain-input" type="number" min="0" max="10" value="3" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-teal-500">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Absolvierte Übungen</label>
+                            <input id="diary-exercises-input" type="text" placeholder="z.B. Fersenschleifen, Wadendehnung..." class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-teal-500">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Persönliche Notiz / Befinden</label>
+                        <input id="diary-note-input" type="text" placeholder="z.B. Leichtes Ziehen am Anfang, nach 5 Minuten deutlich freier..." class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:ring-teal-500">
+                    </div>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs transition-colors">
+                        Eintrag speichern
+                    </button>
+                </form>
+
+                <!-- Liste der bisherigen Einträge -->
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 mb-4">Bisherige Einträge</h3>
+                    <div id="diary-entries-list" class="space-y-3">
+                        <!-- Dynamisch durch app.js -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================================================= -->
+    <!-- WORKOUT PLAYER MODAL (GEFÜHRTER TIMER) -->
+    <!-- ========================================================================= -->
+    <div id="workout-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl relative flex flex-col items-center text-center">
+            
+            <!-- Close Button -->
+            <button onclick="app.stopWorkout()" class="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <!-- Exercise Category & Phase -->
+            <span id="workout-ex-category" class="text-xs font-semibold text-slate-400 mb-2">Übung 1 von 3</span>
+            <h2 id="workout-ex-title" class="text-2xl font-extrabold text-slate-900 mb-2">Fersenschleifen im Liegen</h2>
+            <div id="workout-phase-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-100 text-teal-800 mb-4">
+                Aktiv üben
+            </div>
+
+            <!-- Set Info -->
+            <p id="workout-set-info" class="text-xs font-bold text-slate-500 mb-6">Satz 1 von 3</p>
+
+            <!-- Circular SVG Countdown Timer -->
+            <div class="relative w-52 h-52 flex items-center justify-center mb-6">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="104" cy="104" r="88" stroke="#e2e8f0" stroke-width="12" fill="transparent" />
+                    <circle id="timer-progress-circle" cx="104" cy="104" r="88" stroke="#0d9488" stroke-width="12" stroke-linecap="round" fill="transparent" stroke-dasharray="552.92" stroke-dashoffset="0" class="timer-circle" />
+                </svg>
+                <div class="absolute flex flex-col items-center">
+                    <span id="workout-time-display" class="text-4xl font-extrabold text-slate-900 tracking-tight font-mono">0:35</span>
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Sekunden</span>
+                </div>
+            </div>
+
+            <!-- Live Instructions & Tip -->
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 w-full mb-6 text-left">
+                <p id="workout-instruction-hint" class="text-xs text-slate-700 leading-relaxed font-medium mb-1.5">
+                    Ziehen Sie die Ferse langsam und kontrolliert über den Boden in Richtung Gesäß.
+                </p>
+                <p id="workout-tip" class="text-[11px] text-teal-700 italic">
+                    Tipp: Ruhig und gleichmäßig weiteratmen.
+                </p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-center gap-4 w-full">
+                <button onclick="app.toggleWorkoutTimer()" id="workout-play-btn" class="w-16 h-16 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center shadow-lg shadow-teal-600/30 transition-transform active:scale-95">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </button>
+                <button onclick="app.skipWorkoutStep()" class="p-4 rounded-2xl border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors" title="Nächster Schritt / Überspringen">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- EXERCISE DETAIL MODAL -->
+    <!-- ========================================================================= -->
+    <div id="exercise-detail-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl relative">
+            <div id="exercise-detail-content">
+                <!-- Dynamisch gefüllt durch app.js -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- FOOTER -->
+    <!-- ========================================================================= -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+            <div>
+                <p class="font-bold text-slate-700">KnieVital - Digitale Knie-Therapie & Physio-Beratung</p>
+                <p>Hinweis: Diese Anwendung dient Informations- und Trainingszwecken und ersetzt keinen ärztlichen Befund.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="app.switchTab('overview')" class="hover:text-teal-600">Übersicht</button>
+                <button onclick="app.switchTab('light-exercises')" class="hover:text-teal-600">Leichte Übungen</button>
+                <button onclick="app.switchTab('stretching')" class="hover:text-teal-600">Dehnungen</button>
+                <button onclick="window.print()" class="hover:text-teal-600 font-semibold">Druckansicht</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/exercises.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/consultant.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
